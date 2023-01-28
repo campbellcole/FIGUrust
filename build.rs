@@ -1,6 +1,6 @@
-use std::{process::Command, time::SystemTime};
+use std::process::Command;
 
-use chrono::{NaiveDate, Utc};
+use chrono::Utc;
 const UNKNOWN_GIT_HASH: &str = "UNKNOWN";
 
 fn main() {
