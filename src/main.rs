@@ -2,6 +2,7 @@ use std::{path::PathBuf, process::exit};
 
 use clap::Parser;
 
+mod font;
 mod settings;
 mod utils;
 
