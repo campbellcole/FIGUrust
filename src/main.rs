@@ -6,6 +6,9 @@ mod font;
 mod settings;
 mod utils;
 
+#[cfg(test)]
+mod tests;
+
 fn default_font_dir() -> PathBuf {
     dirs::data_dir()
         .expect("Could not find data directory, set --font-dir manually")
@@ -68,7 +71,7 @@ fn main() {
     let settings = match settings::Settings::try_from(args) {
         Ok(settings) => settings,
         Err(e) => {
-            eprintln!("{}", e);
+            eprintln!("{e}");
             std::process::exit(1);
         }
     };
@@ -78,5 +81,5 @@ fn main() {
         exit(0);
     }
 
-    println!("{:#?}", settings);
+    println!("{settings:#?}");
 }
