@@ -86,7 +86,7 @@ impl RawHeader {
     }
 
     fn extract_required_segment<T>(
-        segments: &Vec<&str>,
+        segments: &[&str],
         idx: usize,
         name: &'static str,
     ) -> Result<T, HeaderParseError>
@@ -102,7 +102,7 @@ impl RawHeader {
     }
 
     fn extract_optional_segment<T>(
-        segments: &Vec<&str>,
+        segments: &[&str],
         idx: usize,
         name: &'static str,
     ) -> Result<Option<T>, HeaderParseError>

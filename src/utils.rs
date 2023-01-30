@@ -1,6 +1,5 @@
 use crate::settings::Settings;
 
-pub const FONT_FILE_SUFFIX: &str = ".frf";
 pub const FONT_FILE_SIGNATURE: &str = "flf2";
 
 pub fn print_info(settings: &Settings) {
@@ -36,7 +35,7 @@ pub fn print_info(settings: &Settings) {
         }
         5 => {
             // font format signature
-            println!("{}", FONT_FILE_SIGNATURE);
+            println!("{FONT_FILE_SIGNATURE}");
         }
         _ => {}
     }

@@ -12,7 +12,7 @@ pub struct FIGcharacter {
 #[derive(Debug, Error)]
 pub enum CharacterParseError {
     #[error("Temp")]
-    Temp,
+    _Temp,
 }
 
 impl FIGcharacter {

@@ -1,4 +1,4 @@
-use std::{path::PathBuf, process::exit};
+use std::{io::Read, path::PathBuf, process::exit};
 
 use clap::Parser;
 
@@ -81,5 +81,30 @@ fn main() {
         exit(0);
     }
 
-    println!("{settings:#?}");
+    let font_path = settings
+        .font_directory
+        .join(&settings.font)
+        .with_extension("flf");
+
+    let font = match font::FIGfont::from_file(&font_path) {
+        Ok(font) => font,
+        Err(err) => {
+            eprintln!("Failed to load font '{font_path:?}: {err}'");
+            exit(1);
+        }
+    };
+
+    let mut buf = String::new();
+    if let Err(err) = std::io::stdin().read_to_string(&mut buf) {
+        eprintln!("Failed to read from stdin: {err}");
+        exit(1);
+    }
+
+    match font.convert(buf) {
+        Ok(output) => println!("{output}"),
+        Err(err) => {
+            eprintln!("Failed to convert text: {err}");
+            exit(1);
+        }
+    }
 }

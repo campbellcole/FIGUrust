@@ -1,5 +1,6 @@
 use std::sync::Once;
 
+#[allow(unused_imports)]
 use log::{debug, error, info, trace, warn, LevelFilter};
 
 use crate::font::{FIGfont, RawHeader};
@@ -10,7 +11,7 @@ static INIT: Once = Once::new();
 
 fn init() {
     INIT.call_once(|| {
-        let _ = env_logger::builder()
+        env_logger::builder()
             .filter_level(LevelFilter::Trace)
             .is_test(false)
             .init();
@@ -51,7 +52,26 @@ pub fn test_parse_characters() {
     init();
 
     let small_font = include_str!("tests/small.flf");
+    let _ = small_font.parse::<FIGfont>().expect("failed to parse font");
+}
+
+#[test]
+pub fn test_convert_text() {
+    init();
+
+    let small_font = include_str!("tests/small.flf");
     let font = small_font.parse::<FIGfont>().expect("failed to parse font");
 
-    debug!("{:#?}", font.characters.get(&34));
+    let text = "Hello, world!";
+    let converted = font.convert(text).expect("failed to convert text");
+
+    let expected = r#"
+  _  _         _   _                                    _      _   _ 
+ | || |  ___  | | | |  ___        __ __ __  ___   _ _  | |  __| | | |
+ | __ | / -_) | | | | / _ \  _    \ V  V / / _ \ | '_| | | / _` | |_|
+ |_||_| \___| |_| |_| \___/ ( )    \_/\_/  \___/ |_|   |_| \__,_| (_)
+                            |/                                       
+"#;
+
+    assert_eq!(converted, expected[1..]);
 }

@@ -56,6 +56,7 @@ impl FromStr for FIGfont {
     }
 }
 
+// static methods
 impl FIGfont {
     fn read_required_characters(
         lines: &[&str],
@@ -80,5 +81,43 @@ impl FIGfont {
     pub fn from_file(path: impl AsRef<Path>) -> Result<Self, FontLoadError> {
         let contents = std::fs::read_to_string(path)?;
         contents.parse()
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum FontConvertError {
+    #[error("Font does not contain character: '{0}'")]
+    MissingCharacter(char),
+}
+
+// instance methods
+impl FIGfont {
+    pub fn convert(&self, content: impl AsRef<str>) -> Result<String, FontConvertError> {
+        let content = content.as_ref();
+        let mut char_lines = vec![];
+        let mut output = String::new();
+
+        for line in content.lines() {
+            let mut chars = vec![];
+            for c in line.chars() {
+                let code = c as u32;
+                let Some(character) = self.characters.get(&code) else {
+                    return Err(FontConvertError::MissingCharacter(c));
+                };
+                chars.push(character);
+            }
+            char_lines.push(chars);
+        }
+
+        for char_line in char_lines {
+            for y in 0..self.header.height {
+                for character in &char_line {
+                    output.push_str(&character.char_lines[y as usize]);
+                }
+                output.push('\n');
+            }
+        }
+
+        Ok(output)
     }
 }

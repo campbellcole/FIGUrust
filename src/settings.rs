@@ -81,8 +81,8 @@ fn assert_none_true(
     vals: impl IntoIterator<Item = bool>,
 ) -> Result<(), String> {
     vals.into_iter()
-        .all(|x| x == false)
-        .then(|| ())
+        .all(|x| !x)
+        .then_some(())
         .ok_or(format!("cannot set multiple {name} options"))
 }
 
