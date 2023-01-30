@@ -10,6 +10,7 @@ pub use header::RawHeader;
 pub use chars::FIGcharacter;
 use thiserror::Error;
 
+#[derive(Debug)]
 pub struct FIGfont {
     // temp until i write a Header struct that uses the enums
     pub header: RawHeader,
@@ -47,7 +48,11 @@ impl FromStr for FIGfont {
 
         Self::read_required_characters(&lines, &header, &mut characters)?;
 
-        Err(FontLoadError::EmptyString)
+        Ok(Self {
+            header,
+            comments,
+            characters,
+        })
     }
 }
 

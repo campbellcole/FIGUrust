@@ -2,11 +2,11 @@ use thiserror::Error;
 
 use super::RawHeader;
 
+#[derive(Debug)]
 pub struct FIGcharacter {
     pub code: u32,
-    pub characters: Vec<String>,
-    pub width: u16,
-    pub baseline: u16,
+    pub char_lines: Vec<String>,
+    pub width: usize,
 }
 
 #[derive(Debug, Error)]
@@ -23,13 +23,25 @@ impl FIGcharacter {
     ) -> Result<Self, CharacterParseError> {
         let mut char_lines = vec![];
         let mut width = 0;
-        for line in lines {
-            let line = line.trim_end();
-            if line.len() > width {
-                width = line.len();
+        for (x, line) in lines.iter().enumerate() {
+            let line_width = if x == lines.len() - 1 && header.height != 1 {
+                // the last line of multiline characters have @@ at the end
+                line.len() - 2
+            } else {
+                // all other lines have @ at the end
+                line.len() - 1
+            };
+
+            if line_width > width {
+                width = line_width;
             }
-            char_lines.push(line.to_string());
+
+            char_lines.push(line[..line_width].replace(header.hardblank, " "));
         }
-        // TODO: left off here
+        Ok(Self {
+            code,
+            char_lines,
+            width,
+        })
     }
 }
