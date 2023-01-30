@@ -243,7 +243,7 @@ dependencies = [
 
 [[package]]
 name = "figurust"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "env_logger",
@@ -253,7 +253,12 @@ dependencies = [
 
 [[package]]
 name = "figurust-bin"
-version = "0.1.0"
+version = "0.2.0"
+dependencies = [
+ "clap",
+ "env_logger",
+ "log",
+]
 
 [[package]]
 name = "getrandom"
