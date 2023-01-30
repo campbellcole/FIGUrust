@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use thiserror::Error;
 
-use crate::utils::FONT_FILE_SIGNATURE;
+use crate::FIGLET_FONT_SIGNATURE;
 
 #[derive(Debug)]
 pub struct RawHeader {
@@ -73,7 +73,7 @@ impl FromStr for RawHeader {
 impl RawHeader {
     fn read_signature(segment: &str) -> Result<(String, char), HeaderParseError> {
         let signature: String = segment.chars().take(segment.len() - 1).collect();
-        if !signature.starts_with(FONT_FILE_SIGNATURE) {
+        if !signature.starts_with(FIGLET_FONT_SIGNATURE) {
             return Err(HeaderParseError::InvalidSignature(signature));
         }
 

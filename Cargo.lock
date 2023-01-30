@@ -228,17 +228,32 @@ dependencies = [
 ]
 
 [[package]]
-name = "figurust"
-version = "0.1.0"
+name = "figlet-compat"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "clap",
  "dirs",
  "env_logger",
+ "figurust",
  "log",
  "termsize",
  "thiserror",
 ]
+
+[[package]]
+name = "figurust"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "env_logger",
+ "log",
+ "thiserror",
+]
+
+[[package]]
+name = "figurust-bin"
+version = "0.1.0"
 
 [[package]]
 name = "getrandom"

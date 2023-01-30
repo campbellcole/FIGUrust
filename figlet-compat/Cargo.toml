@@ -1,0 +1,21 @@
+[package]
+name = "figlet-compat"
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+chrono = "0.4.23"
+
+[dependencies]
+clap = { version = "4.1.4", features = ["derive"] }
+dirs = "4.0.0"
+termsize = "0.1.6"
+
+log.workspace = true
+env_logger.workspace = true
+thiserror.workspace = true
+
+figurust = { path = "../figurust" }

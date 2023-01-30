@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use thiserror::Error;
+
 use crate::Args;
 
 #[derive(Debug, Default)]
@@ -9,18 +11,6 @@ pub enum Justify {
     Right,
     #[default]
     Auto,
-}
-
-#[derive(Debug)]
-pub enum Width {
-    Terminal,
-    Fixed(usize),
-}
-
-impl Default for Width {
-    fn default() -> Self {
-        Width::Fixed(80)
-    }
 }
 
 #[derive(Debug, Default)]
@@ -54,7 +44,7 @@ pub struct Settings {
 
     pub justify: Justify,
 
-    pub width: Width,
+    pub width: usize,
 
     pub mode: Mode,
 
@@ -67,27 +57,26 @@ pub struct Settings {
     pub direction: Direction,
 }
 
-impl Settings {
-    pub fn width(&self) -> usize {
-        match self.width {
-            Width::Terminal => termsize::get().expect("failed to get terminal size").cols as usize,
-            Width::Fixed(w) => w,
-        }
-    }
+#[derive(Debug, Error)]
+pub enum SettingsError {
+    #[error("cannot set multiple {0} options")]
+    ConflictingOptions(&'static str),
+    #[error("Attempted to use --use-terminal-width outside of a terminal")]
+    NoTerminalSize,
 }
 
 fn assert_none_true(
     name: &'static str,
     vals: impl IntoIterator<Item = bool>,
-) -> Result<(), String> {
+) -> Result<(), SettingsError> {
     vals.into_iter()
         .all(|x| !x)
         .then_some(())
-        .ok_or(format!("cannot set multiple {name} options"))
+        .ok_or(SettingsError::ConflictingOptions(name))
 }
 
 impl TryFrom<Args> for Settings {
-    type Error = String;
+    type Error = SettingsError;
     fn try_from(value: Args) -> Result<Self, Self::Error> {
         let mut justify = Justify::default();
         if value.justify_detect {
@@ -132,12 +121,14 @@ impl TryFrom<Args> for Settings {
             )?;
         }
 
-        let mut width = Width::default();
+        let mut width = 80;
         if value.use_terminal_width {
-            width = Width::Terminal;
+            width = termsize::get()
+                .map(|dim| dim.cols as usize)
+                .ok_or(SettingsError::NoTerminalSize)?;
             assert_none_true("width", [value.width.is_some()])?;
         } else if let Some(w) = value.width {
-            width = Width::Fixed(w);
+            width = w;
             assert_none_true("width", [value.use_terminal_width])?;
         }
 

@@ -1,7 +1,5 @@
 use crate::settings::Settings;
 
-pub const FONT_FILE_SIGNATURE: &str = "flf2";
-
 pub fn print_info(settings: &Settings) {
     match settings.info_code {
         0 => {
@@ -31,11 +29,11 @@ pub fn print_info(settings: &Settings) {
         }
         4 => {
             // font width
-            println!("{}", settings.width());
+            println!("{}", settings.width);
         }
         5 => {
             // font format signature
-            println!("{FONT_FILE_SIGNATURE}");
+            println!("{}", figurust::FIGLET_FONT_SIGNATURE);
         }
         _ => {}
     }

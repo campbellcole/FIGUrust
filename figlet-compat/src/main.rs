@@ -1,13 +1,11 @@
 use std::{io::Read, path::PathBuf, process::exit};
 
 use clap::Parser;
+use figurust::font::FIGfont;
+use log::error;
 
-mod font;
 mod settings;
 mod utils;
-
-#[cfg(test)]
-mod tests;
 
 fn default_font_dir() -> PathBuf {
     dirs::data_dir()
@@ -66,12 +64,18 @@ pub struct Args {
 }
 
 fn main() {
+    env_logger::builder()
+        .format_timestamp(None)
+        .format_module_path(false)
+        .format_target(false)
+        .init();
+
     let args = Args::parse();
 
     let settings = match settings::Settings::try_from(args) {
         Ok(settings) => settings,
         Err(e) => {
-            eprintln!("{e}");
+            error!("Invalid arguments: {e}");
             std::process::exit(1);
         }
     };
@@ -86,24 +90,24 @@ fn main() {
         .join(&settings.font)
         .with_extension("flf");
 
-    let font = match font::FIGfont::from_file(&font_path) {
+    let font = match FIGfont::from_file(&font_path) {
         Ok(font) => font,
         Err(err) => {
-            eprintln!("Failed to load font '{font_path:?}: {err}'");
+            error!("Failed to load font '{font_path:?}: {err}'");
             exit(1);
         }
     };
 
     let mut buf = String::new();
     if let Err(err) = std::io::stdin().read_to_string(&mut buf) {
-        eprintln!("Failed to read from stdin: {err}");
+        error!("Failed to read from stdin: {err}");
         exit(1);
     }
 
     match font.convert(buf) {
         Ok(output) => println!("{output}"),
         Err(err) => {
-            eprintln!("Failed to convert text: {err}");
+            error!("Failed to convert text: {err}");
             exit(1);
         }
     }
