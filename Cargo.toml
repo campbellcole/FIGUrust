@@ -10,4 +10,8 @@ authors = ["Campbell Cole <cmcoleco@gmail.com>"]
 thiserror = "1.0.38"
 env_logger = "0.10.0"
 log = "0.4.17"
-clap = { version = "4.1.4", features = ["derive"] }
+clap = { version = "4.1.4", features = ["derive", "cargo"] }
+serde = { version = "1", features = ["derive"] }
+ron = "0.8"
+execute = "0.2.11"
+owo-colors = "3.5.0"

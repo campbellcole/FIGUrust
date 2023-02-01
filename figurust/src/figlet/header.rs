@@ -4,15 +4,18 @@ use thiserror::Error;
 
 use crate::FIGLET_FONT_SIGNATURE;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RawHeader {
+    #[serde(skip)]
     pub signature: String,
+    #[serde(skip)]
     pub hardblank: char,
 
     pub height: u16,
     pub baseline: u16,
     pub max_length: u16,
     pub old_layout: i8,
+    #[serde(skip)]
     pub comment_lines: u16,
 
     pub direction: Option<u16>,

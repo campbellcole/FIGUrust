@@ -1,4 +1,4 @@
-use crate::settings::Settings;
+use figurust::settings::Settings;
 
 pub fn print_info(settings: &Settings) {
     match settings.info_code {

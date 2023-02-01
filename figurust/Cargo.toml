@@ -12,5 +12,7 @@ chrono = "0.4.23"
 [dependencies]
 env_logger.workspace = true
 log.workspace = true
-
 thiserror.workspace = true
+serde.workspace = true
+execute.workspace = true
+itertools = "0.10.5"

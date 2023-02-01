@@ -3,7 +3,10 @@ use std::sync::Once;
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn, LevelFilter};
 
-use crate::font::{FIGfont, RawHeader};
+use crate::{
+    figlet::{FIGfont, RawHeader},
+    settings::{self, Spacing},
+};
 
 mod small;
 
@@ -61,9 +64,16 @@ pub fn test_convert_text() {
 
     let small_font = include_str!("tests/small.flf");
     let font = small_font.parse::<FIGfont>().expect("failed to parse font");
+    let mut settings =
+        settings::figlet_default_settings().expect("failed to generate default settings");
+
+    // currently the only implemented spacing mode
+    settings.spacing = Spacing::FullWidth;
 
     let text = "Hello, world!";
-    let converted = font.convert(text).expect("failed to convert text");
+    let converted = font
+        .convert(text, &settings)
+        .expect("failed to convert text");
 
     let expected = r#"
   _  _         _   _                                    _      _   _ 

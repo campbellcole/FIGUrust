@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
+
+FIGLET_FONT_DIR="$(figlet -I 2)"
+
+if ! [ -x "$ROOT_DIR/target/release/figlet-compat" ]; then
+    cargo build --manifest-path "$ROOT_DIR/Cargo.toml"
+fi
+
+"$ROOT_DIR/target/release/figlet-compat" -d "$FIGLET_FONT_DIR" $@

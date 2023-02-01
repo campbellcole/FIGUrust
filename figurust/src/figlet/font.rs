@@ -1,16 +1,13 @@
-// dont use char because it's ambiguous
-mod chars;
-mod figure;
-mod header;
-
 use std::{collections::HashMap, path::Path, str::FromStr};
 
-pub use header::RawHeader;
-// pub use figure::FIGure;
-pub use chars::FIGcharacter;
+use itertools::Itertools;
 use thiserror::Error;
 
-#[derive(Debug)]
+use crate::settings::{Settings, Spacing};
+
+use super::*;
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FIGfont {
     // temp until i write a Header struct that uses the enums
     pub header: RawHeader,
@@ -26,9 +23,9 @@ pub enum FontLoadError {
     #[error("Missing header")]
     MissingHeader,
     #[error("Failed to parse header: {0}")]
-    HeaderError(#[from] header::HeaderParseError),
+    HeaderError(#[from] HeaderParseError),
     #[error("Failed to parse character: {0}")]
-    CharacterError(#[from] chars::CharacterParseError),
+    CharacterError(#[from] CharacterParseError),
     #[error("IO Error: {0:?}")]
     IoError(#[from] std::io::Error),
 }
@@ -40,13 +37,14 @@ impl FromStr for FIGfont {
             return Err(FontLoadError::EmptyString);
         }
 
-        let lines: Vec<_> = s.lines().collect();
+        let mut lines: Vec<_> = s.lines().collect();
 
         let header: RawHeader = lines.first().ok_or(FontLoadError::MissingHeader)?.parse()?;
         let comments = lines[1..header.comment_lines as usize + 1].join("\n");
         let mut characters = HashMap::new();
 
-        Self::read_required_characters(&lines, &header, &mut characters)?;
+        // this function takes the characters out of the lines vector
+        Self::read_required_characters(&mut lines, &header, &mut characters)?;
 
         Ok(Self {
             header,
@@ -59,7 +57,7 @@ impl FromStr for FIGfont {
 // static methods
 impl FIGfont {
     fn read_required_characters(
-        lines: &[&str],
+        lines: &mut [&str],
         header: &RawHeader,
         map: &mut HashMap<u32, FIGcharacter>,
     ) -> Result<(), FontLoadError> {
@@ -68,11 +66,10 @@ impl FIGfont {
 
         // ascii characters 32-126
         for i in 32..=126 {
-            let code = i as u32;
             let idx = offset + ((i - 32) * char_height);
 
-            let character = FIGcharacter::from_lines(&lines[idx..idx + char_height], code, header)?;
-            map.insert(code, character);
+            let character = FIGcharacter::from_lines(&mut lines[idx..idx + char_height], header)?;
+            map.insert(i as u32, character);
         }
 
         Ok(())
@@ -92,7 +89,11 @@ pub enum FontConvertError {
 
 // instance methods
 impl FIGfont {
-    pub fn convert(&self, content: impl AsRef<str>) -> Result<String, FontConvertError> {
+    pub fn convert(
+        &self,
+        content: impl AsRef<str>,
+        settings: &Settings,
+    ) -> Result<String, FontConvertError> {
         let content = content.as_ref();
         let mut char_lines = vec![];
         let mut output = String::new();
@@ -109,13 +110,34 @@ impl FIGfont {
             char_lines.push(chars);
         }
 
-        for char_line in char_lines {
-            for y in 0..self.header.height {
-                for character in &char_line {
-                    output.push_str(&character.char_lines[y as usize]);
+        match settings.spacing {
+            Spacing::FullWidth => {
+                for char_line in char_lines {
+                    for y in 0..self.header.height {
+                        for character in &char_line {
+                            output.push_str(&character.char_lines[y as usize]);
+                        }
+                        output.push('\n');
+                    }
                 }
-                output.push('\n');
             }
+            Spacing::Smushing => {
+                for char_line in char_lines {
+                    for y in 0..self.header.height {
+                        char_line.first().unwrap().join_line(
+                            &mut output,
+                            y,
+                            &settings.spacing,
+                            None,
+                        );
+                        for (prev, character) in char_line.iter().tuple_windows() {
+                            character.join_line(&mut output, y, &settings.spacing, Some(prev));
+                        }
+                        output.push('\n');
+                    }
+                }
+            }
+            _ => unimplemented!("Spacing: {:?}", settings.spacing),
         }
 
         Ok(output)

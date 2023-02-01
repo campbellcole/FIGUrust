@@ -10,3 +10,8 @@ edition.workspace = true
 clap.workspace = true
 log.workspace = true
 env_logger.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+ron.workspace = true
+
+figurust = { path = "../figurust" }

@@ -1,60 +1,78 @@
 use std::path::PathBuf;
 
+use figurust::settings::{Direction, Justify, Mode, Settings, Spacing};
 use thiserror::Error;
 
-use crate::Args;
+use crate::{consts::Smushmode, Args};
 
-#[derive(Debug, Default)]
-pub enum Justify {
-    Left,
-    Center,
-    Right,
-    #[default]
-    Auto,
+// enumification of figlet `justification` variable
+#[derive(Debug)]
+pub enum Justification {
+    Auto = -1,
+    Left = 0,
+    Center = 1,
+    Right = 2,
 }
 
-#[derive(Debug, Default)]
-pub enum Mode {
-    Paragraph,
-    #[default]
-    Normal,
+impl From<u8> for Justification {
+    fn from(val: u8) -> Self {
+        match val {
+            0 => Self::Left,
+            1 => Self::Center,
+            2 => Self::Right,
+            _ => Self::Auto,
+        }
+    }
 }
 
-#[derive(Debug, Default)]
-pub enum Spacing {
-    #[default]
-    Smushing,
-    ForceSmushing,
-    Kerning,
-    FullWidth,
+// enumification of figlet `right2left` variable
+#[derive(Debug)]
+pub enum RightToLeft {
+    Detect = -1,
+    Left = 0,
+    Right = 1,
 }
 
-#[derive(Debug, Default)]
-pub enum Direction {
-    LeftToRight,
-    RightToLeft,
-    #[default]
-    Auto,
+impl From<i8> for RightToLeft {
+    fn from(val: i8) -> Self {
+        match val {
+            0 => Self::Left,
+            1 => Self::Right,
+            _ => Self::Detect,
+        }
+    }
+}
+
+// enumification of figlet `paragraph` variable
+#[derive(Debug)]
+pub enum ParagraphMode {
+    Normal = 0,
+    Paragraph = 1,
+}
+
+impl From<u8> for ParagraphMode {
+    fn from(val: u8) -> Self {
+        match val {
+            0 => Self::Normal,
+            1 => Self::Paragraph,
+            _ => Self::Normal,
+        }
+    }
 }
 
 #[derive(Debug)]
-pub struct Settings {
-    pub font: String,
+pub struct FigletSettings {
+    pub font_name: String,
     pub font_directory: PathBuf,
-
-    pub justify: Justify,
-
-    pub width: usize,
-
-    pub mode: Mode,
-
-    pub spacing: Spacing,
-
-    pub layout_mode: Option<u8>,
-
-    pub info_code: i8,
-
-    pub direction: Direction,
+    pub smush_override: u8,
+    /// if this is not defined use the font's default
+    pub smush_mode: Option<Smushmode>,
+    pub justification: Justification,
+    pub right_to_left: RightToLeft,
+    pub paragraph: ParagraphMode,
+    pub infocode: i8,
+    pub width: u16,
+    pub message: Option<String>,
 }
 
 #[derive(Debug, Error)]
@@ -184,6 +202,7 @@ impl TryFrom<Args> for Settings {
             width,
             mode,
             spacing,
+            overlap: value.overlap,
             layout_mode: value.layout_mode,
             info_code: value.info_code,
             direction,
